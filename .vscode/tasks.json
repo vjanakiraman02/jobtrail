@@ -1,0 +1,106 @@
+{
+  "version": "2.0.0",
+  // Run with: Terminal > Run Task... (or Ctrl/Cmd+Shift+P > "Tasks: Run Task").
+  // Each task runs ONE command (no && or ;) so it works in cmd, PowerShell, bash, and zsh.
+  // Venv commands use the macOS/Linux path; Windows overrides are included.
+  "tasks": [
+    {
+      "label": "setup: create backend venv",
+      "type": "shell",
+      "command": "python3 -m venv .venv",
+      "windows": { "command": "python -m venv .venv" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "setup: backend venv + deps",
+      "type": "shell",
+      "command": ".venv/bin/pip install -r requirements-dev.txt",
+      "windows": { "command": ".venv\\Scripts\\pip install -r requirements-dev.txt" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "dependsOn": ["setup: create backend venv"],
+      "problemMatcher": []
+    },
+    {
+      "label": "setup: frontend deps",
+      "type": "shell",
+      "command": "npm install",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "db: start Postgres (Docker)",
+      "type": "shell",
+      "command": "docker compose up -d db",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "stack: start everything (Docker)",
+      "type": "shell",
+      "command": "docker compose up --build",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "backend: test",
+      "type": "shell",
+      "command": ".venv/bin/pytest",
+      "windows": { "command": ".venv\\Scripts\\pytest" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "backend: ruff check",
+      "type": "shell",
+      "command": ".venv/bin/ruff check .",
+      "windows": { "command": ".venv\\Scripts\\ruff check ." },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "backend: ruff format check",
+      "type": "shell",
+      "command": ".venv/bin/ruff format --check .",
+      "windows": { "command": ".venv\\Scripts\\ruff format --check ." },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "backend: lint + format check",
+      "dependsOn": ["backend: ruff check", "backend: ruff format check"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: typecheck",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: build + typecheck",
+      "dependsOn": ["frontend: build", "frontend: typecheck"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "seed: load sample data",
+      "type": "shell",
+      "command": "python3 scripts/seed_sample_data.py",
+      "windows": { "command": "python scripts/seed_sample_data.py" },
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}

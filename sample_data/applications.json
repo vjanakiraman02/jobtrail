@@ -1,0 +1,44 @@
+[
+  {
+    "company": "Example Bank",
+    "title": "Software Engineer, Data Platform",
+    "location": "New York, NY",
+    "url": "https://example.com/jobs/1001",
+    "status": "applied"
+  },
+  {
+    "company": "Acme Cloud",
+    "title": "Backend Engineer",
+    "location": "Remote (US)",
+    "url": "https://example.com/jobs/1002",
+    "status": "saved"
+  },
+  {
+    "company": "Northwind Capital",
+    "title": "Full-Stack Engineer",
+    "location": "Jersey City, NJ",
+    "url": "https://example.com/jobs/1003",
+    "status": "interview"
+  },
+  {
+    "company": "Globex Systems",
+    "title": "Machine Learning Engineer",
+    "location": "Boston, MA",
+    "url": "https://example.com/jobs/1004",
+    "status": "assessment"
+  },
+  {
+    "company": "Initech",
+    "title": "Platform Engineer",
+    "location": "Philadelphia, PA",
+    "url": "https://example.com/jobs/1005",
+    "status": "rejected"
+  },
+  {
+    "company": "Umbrella Analytics",
+    "title": "Software Engineer II",
+    "location": "Newark, NJ",
+    "url": "https://example.com/jobs/1006",
+    "status": "saved"
+  }
+]

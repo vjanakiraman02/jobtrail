@@ -1,0 +1,28 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Real job-search data stays on your machine
+private/
+data/
+*.db
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+next-env.d.ts
+
+# OS / editor noise (shared VS Code config in .vscode/ is committed on purpose)
+.DS_Store
+Thumbs.db
+.vscode/*.log
