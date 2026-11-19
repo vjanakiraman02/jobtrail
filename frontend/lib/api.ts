@@ -29,6 +29,19 @@ export interface NewApplication {
   location?: string;
   url?: string;
   status?: Status;
+  description?: string;
+}
+
+export type WorkMode = "onsite" | "hybrid" | "remote";
+
+/** What the model pulled out of a pasted posting. Every field can be missing. */
+export interface ExtractedJob {
+  company: string | null;
+  title: string | null;
+  location: string | null;
+  work_mode: WorkMode | null;
+  salary_range: string | null;
+  required_skills: string[];
 }
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -67,4 +80,10 @@ export const api = {
     }),
   remove: (id: number) =>
     request<void>(`/api/v1/applications/${id}`, { method: "DELETE" }),
+  /** Extract fields from posting text. Nothing is saved until the user adds it. */
+  extract: (text: string) =>
+    request<ExtractedJob>("/api/v1/extract", {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    }),
 };

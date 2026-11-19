@@ -24,6 +24,13 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-jobtrail}:${POSTGRES_PASSWORD:-jobtrail}@db:5432/${POSTGRES_DB:-jobtrail}
       CORS_ORIGINS: http://localhost:3000
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+    extra_hosts:
+      # Lets the container reach Ollama running on your computer (needed on Linux).
+      - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:8000:8000"
     volumes:

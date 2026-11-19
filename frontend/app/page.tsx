@@ -1,7 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { API_BASE, STATUSES, api, type Application, type Status } from "../lib/api";
+import {
+  API_BASE,
+  STATUSES,
+  api,
+  type Application,
+  type ExtractedJob,
+  type Status,
+} from "../lib/api";
+
+const MIN_POSTING_CHARS = 20; // matches the API's minimum
 
 type Filter = Status | "all";
 
@@ -14,6 +23,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [posting, setPosting] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const [extracted, setExtracted] = useState<ExtractedJob | null>(null);
+  const [extractError, setExtractError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -50,14 +63,46 @@ export default function Home() {
         title: form.title.trim(),
         location: form.location.trim() || undefined,
         url: form.url.trim() || undefined,
+        // Keep the pasted posting so it is still there once it disappears from the web.
+        description: posting.trim() || undefined,
       });
       setApplications((current) => [created, ...current]);
       setForm(EMPTY_FORM);
+      setPosting("");
+      setExtracted(null);
+      setExtractError(null);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save the application.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleExtract() {
+    setExtracting(true);
+    setExtractError(null);
+    try {
+      const job = await api.extract(posting.trim());
+      setExtracted(job);
+      // Only fill what the model found; anything it left out stays as typed.
+      setForm((current) => ({
+        ...current,
+        company: job.company ?? current.company,
+        title: job.title ?? current.title,
+        location: job.location ?? current.location,
+      }));
+    } catch (e) {
+      setExtracted(null);
+      setExtractError(
+        e instanceof TypeError
+          ? `Could not reach the API at ${API_BASE}. Is the backend running?`
+          : e instanceof Error
+            ? e.message
+            : "Extraction failed.",
+      );
+    } finally {
+      setExtracting(false);
     }
   }
 
@@ -96,6 +141,56 @@ export default function Home() {
 
       <section className="card" aria-labelledby="add-heading">
         <h2 id="add-heading">Add an application</h2>
+
+        <div className="extract">
+          <label htmlFor="posting">
+            Paste a job posting to fill in the form (optional)
+          </label>
+          <textarea
+            id="posting"
+            rows={5}
+            placeholder="Paste the full job description here…"
+            value={posting}
+            onChange={(e) => setPosting(e.target.value)}
+          />
+          <div className="extract-actions">
+            <button
+              type="button"
+              className="secondary"
+              disabled={extracting || posting.trim().length < MIN_POSTING_CHARS}
+              onClick={() => void handleExtract()}
+            >
+              {extracting ? "Reading posting…" : "Fill from posting"}
+            </button>
+            <span className="hint">
+              The text goes to the model set in your .env. With Ollama it stays on your computer.
+            </span>
+          </div>
+          {extractError && (
+            <p role="alert" className="error small">
+              {extractError}
+            </p>
+          )}
+          {extracted && (
+            <div className="review" aria-live="polite">
+              <p className="hint">Filled from the posting. Check every field before adding.</p>
+              <p className="muted small">
+                {[extracted.work_mode, extracted.salary_range].filter(Boolean).join(" · ") ||
+                  "No work mode or pay stated"}
+              </p>
+              {extracted.required_skills.length > 0 && (
+                <ul className="tags" aria-label="Skills mentioned in the posting">
+                  {extracted.required_skills.map((skill) => (
+                    <li key={skill} className="tag">
+                      {skill}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+
         <form
           className="form"
           onSubmit={(event) => {

@@ -30,6 +30,8 @@ jobs:
       - run: ruff format --check .
       - run: ruff check .
       - run: pytest
+      # Checks the eval harness itself with a perfect fake model; no API key needed.
+      - run: python -m evals.run_eval --oracle
 
   frontend:
     name: Frontend (build + types)
